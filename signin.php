@@ -33,10 +33,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     $uid = $row["uid"];
 
 
-    //$updateSigninTime = "UPDATE Profile SET last_signin = CURRENT_TIMESTAMP WHERE uid = '$uid'";
     if ($row){
-      $_SESSION["uid"] = $uid;
-      header("Location: ./index.html");
+      $_SESSION["uid"] = $row["uid"];
+      header("Location: ./home.php");
     } else {
       echo "Error: " . $checkSignin . "<br>";
     }
@@ -68,7 +67,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 <body class="bg-info dker">
   <section id="content" class="m-t-lg wrapper-md animated fadeInUp">    
     <div class="container aside-xl">
-      <a class="navbar-brand block" href="index.html"><span class="h1 font-bold">Travelovers</span></a>
+      <a class="navbar-brand block" href="home.php"><span class="h1 font-bold">Travelovers</span></a>
       <section class="m-b-lg">
         <header class="wrapper text-center">
           <strong>Sign in to get in touch</strong>

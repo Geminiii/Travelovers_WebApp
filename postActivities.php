@@ -2,22 +2,41 @@
 /**
  * Created by PhpStorm.
  * User: Li
- * Date: 4/30/16
- * Time: 3:04 PM
+ * Date: 4/28/16
+ * Time: 4:29 PM
  */
-session_start();
 
+session_start();
 ini_set('display_errors', 'On');
 
-include ('connectToDB.php');
-$link = mysqli_connect('localhost','root','root');
-if (!$link) {
-    die('Could not connect: ' . mysql_error());
+include('connectToDB.php');
+
+$title = $activity = $picture = $video = $select='';
+
+if($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (empty($_POST["title"])) {
+        $nameErr = "Title is required";
+    }else{
+        $title=$_POST["title"];
+    }
+
+    $activity = $_POST["activity"];
+    $pictureFileName = $_FILES['picture']['tmp_name'];
+    $videoFileName = $_FILES['video']['tmp_name'];
+    if ($pictureFileName){$picture =addslashes(file_get_contents($pictureFileName));}
+    if ($videoFileName) {$video =addslashes(file_get_contents($pictureFileName));}
+
+    $select = $_POST['visibility'];
+
+    $post="INSERT INTO Post(pid, uid, ptime, lid, title, text, image, video, visibility, activity) VALUES (NULL,".$_SESSION["uid"].",NULL,0, '$title', '$activity', '{$picture}', '{$video}', '$select', 1)";
+    if(mysqli_query($link, $post)==TRUE){
+        header('Location:/home.php');
+    }else{
+        echo "Error:".$post."<br>";
+    }
 }
-mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en" class="app">
 <head>
@@ -52,7 +71,7 @@ mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
             <a class="btn btn-link visible-xs" data-toggle="class:nav-off-screen,open" data-target="#nav,html">
                 <i class="icon-list"></i>
             </a>
-            <a href="home.php" class="navbar-brand text-lt">
+            <a href="index.html" class="navbar-brand text-lt">
                 <i class="icon-earphones"></i>
                 <img src="images/logo.png" alt="." class="hide">
                 <span class="hidden-nav-xs m-l-sm">Travelovers</span>
@@ -102,7 +121,7 @@ mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
                 <img src="images/a0.png" alt="...">
               </span>
                         <?php
-                        $myself="SELECT uname FROM User WHERE uid= '$_SESSION[uid]'";
+                        $myself="SELECT uname FROM User WHERE uid= $_SESSION[uid]";
                         $res=mysqli_fetch_assoc(mysqli_query($link, $myself));
                         echo $res['uname'];
                         ?>
@@ -119,7 +138,7 @@ mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
 
                         <li class="divider"></li>
                         <li>
-                            <a href="signin.php" data-toggle="ajaxModal" >Logout</a>
+                            <a href="modal.lockme.html" data-toggle="ajaxModal" >Logout</a>
                         </li>
                     </ul>
                 </li>
@@ -138,7 +157,6 @@ mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
 
                             <!-- nav -->
                             <nav class="nav-primary hidden-xs">
-
                                 <ul class="nav bg clearfix">
                                     <li class="hidden-nav-xs padder m-t m-b-sm text-xs text-muted">
                                         Discover
@@ -172,11 +190,11 @@ mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
 
                                     <li class="m-b hidden-nav-xs"></li>
                                 </ul>
+
                             </nav>
                             <!-- / nav -->
                         </div>
                     </section>
-
 
                 </section>
             </aside>
@@ -194,75 +212,46 @@ mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
                     <span class="bar5 a5 bg-danger dker"></span>
                   </span></h2>
                                 <div class="row row-sm">
-
-                                    <div class="cd-timeline-content">
-<?php
-$display = "SELECT uname, uid, ptime, lname, title, text, image, video, activity FROM Post NATURAL JOIN Location NATURAL JOIN Profile NATURAL JOIN User WHERE pid= '$_GET[pid]';";
-$_SESSION['pid']=$_GET['pid'];
-$result=mysqli_query($link, $display);
-$res1=mysqli_fetch_assoc($result);
-$image = base64_encode($res1['image']);
-
-$commentDisplay = "SELECT uname, ctime, text FROM Comment NATURAL JOIN User WHERE pid='$_GET[pid]'";
-$resCommentDisplay=mysqli_query($link, $commentDisplay);
-$res2=mysqli_fetch_assoc($resCommentDisplay);
-
-$likeCounter="SELECT COUNT(*) c FROM Post_like WHERE pid='$_GET[pid]' AND dislike=0";
-$dislikeCounter="SELECT COUNT(*) c FROM Post_like WHERE pid='$_GET[pid]' AND dislike=1";
-$like = mysqli_query($link, $likeCounter);
-$dislike = mysqli_query($link, $dislikeCounter);
-$res3=mysqli_fetch_assoc($like);
-$res4=mysqli_fetch_assoc($dislike);
-
-?>
-                                        <h2><?php echo $res1['title'];?></h2><br>
-                                        <h5>by  <?php echo $res1['uname']." at ".$res1['ptime'];?></h5><br>
+                                    <section>
+                                        <header height="300px" line-height="200px" text-align="center" background="#303e49">
+                                            <h1 >Post Activity</h1>
+                                        </header><br>
                                         <?php
-                                            if($res1['activity']==1){
-                                                echo "<a href='join.php'><img src='images/images.png'></a>";
-                                            }
-
-                                            $counter="SELECT COUNT(*) c FROM Join_activity WHERE pid = $_SESSION[pid]";
-                                            $res4=mysqli_fetch_assoc(mysqli_query($link, $counter));
-                                            echo "$res4[c] people also joined this activity";
-                                            ?>
-                                        <br>
-
-                                        <p><?php echo $res1['text'];?></p>
-                                        <img class="r r-2x img-full" src='data:image/x-icon;base64, <?php echo $image;?>'/>
-                                        <a href="like.php">
-                                        <i class="icon-like"></i><?php echo $res3['c']?>
-                                        </a>
-                                        <a href="dislike.php">
-                                        <i class="icon-dislike"></i><?php echo $res4['c']?>
-                                        </a><br>
-                                        <?php
-                                        $commentDisplay = "SELECT uname, ctime, text FROM Comment NATURAL JOIN User WHERE pid='$_GET[pid]'";
-                                        $resCommentDisplay=mysqli_query($link, $commentDisplay);
-                                        while($res2=mysqli_fetch_assoc($resCommentDisplay)){
-                                            echo "<div class=\"line\"></div>
-                                        <article class=\"media m-t-none\">
-                                            <a class=\"pull-left thumb thumb-wrapper m-t-xs\">
-                                                <img src=\"images/m2.jpg\">
-                                            </a>";
-                                            echo "<div class=\"media-body\">
-                                                <a class=\"font-semibold\">$res2[text]</a>
-                                                <div class='text-xs block m-t-xs'><h5>by $res2[uname] at $res2[ctime]</h5></div>
-                                            </div>
-                                        </article>";
-                                        }
 
                                         ?>
 
-                                        <form action="comment.php" method="post">
-                                            <div class="form-group">
-                                                <label>Comment</label>
-                                                <textarea name="text" class="form-control" rows="2" placeholder="Type your comment"></textarea>
-                                            </div>
-                                            <div class="form-group">
-                                                <button type="submit" class="btn btn-success">Submit comment</button>
-                                            </div>
-                                        </form>
+<form method="POST" action="postActivities.php" enctype="multipart/form-data">
+    <div class="form-group pull-in clearfix" >
+        <div class="col-sm-6">
+            <label>Title</label>
+            <input name="title" type="text" class="form-control" placeholder="Title">
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Activity description</label>
+        <textarea name="activity" class="form-control" cols="5" rows="5" placeholder="Description"></textarea>
+    </div>
+    <div class="form-group">
+        <label>Select picture to upload</label>
+        <input name="picture" type="file"  class="form-control" placeholder="Picture">
+    </div>
+    <div class="form-group">
+        <label>Select video to upload</label>
+        <input name="video" type="file" class="form-control" placeholder="Video">
+    </div>
+    <div  class="form-group">
+        <label>Choose who can see</label><br>
+        <input type="radio" name = "visibility" value="3" checked> Public<br>
+        <input type="radio" name = "visibility" value="2"> Show to FOF<br>
+        <input type="radio" name = "visibility" value="1"> Show to friends<br>
+        <input type="radio" name = "visibility" value="0"> Only I can see<br>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-success">Submit</button>
+    </div>
+</form>
+                                    </section>
+
 
 
                                 </div>
@@ -295,9 +284,18 @@ $res4=mysqli_fetch_assoc($dislike);
                                 <h4 class="font-thin m-l-md m-t">Connected</h4>
                                 <ul class="list-group no-bg no-borders auto m-t-n-xxs">
                                     <?php
-                                    $friendList="SELECT uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid";
+                                    if($_SERVER["REQUEST_METHOD"] == "POST") {
+                                        $searchMem = $_POST['searchMem'];
+                                        if ($searchMem) {
+                                            $friendList = "SELECT uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid AND Uname LIKE '%$searchMem%'";
+                                        }else {
+                                            $friendList = "SELECT uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid";
+                                        }
+                                    }else {
+                                        $friendList = "SELECT uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid";
+                                    }
                                     $result = mysqli_query($link, $friendList);
-                                    while($res1=mysqli_fetch_assoc($result)){
+                                    while ($res1 = mysqli_fetch_assoc($result)) {
                                         echo "<li class=\"list-group-item\">
                       <span class=\"pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm\">
                         <img src=\"images/a1.png\" alt=\"...\" class=\"img-circle\">
@@ -308,23 +306,21 @@ $res4=mysqli_fetch_assoc($dislike);
                         <small class=\"text-muted\">$res1[city]</small>
                       </div>
                     </li>";
+
                                     }
                                     ?>
-
-
-
 
 
                                 </ul>
                             </section>
                             <footer class="footer footer-md bg-black">
-                                <form class="" role="search">
+                                <form method="post" action="home.php" class="" role="search">
                                     <div class="form-group clearfix m-b-none">
                                         <div class="input-group m-t m-b">
                         <span class="input-group-btn">
-                          <button type="submit" class="btn btn-sm bg-empty text-muted btn-icon"><i class="fa fa-search"></i></button>
+                          <button  type="submit" class="btn btn-sm bg-empty text-muted btn-icon"><i class="fa fa-search"></i></button>
                         </span>
-                                            <input type="text" class="form-control input-sm text-white bg-empty b-b b-dark no-border" placeholder="Search members">
+                                            <input name="searchMem" type="text" class="form-control input-sm text-white bg-empty b-b b-dark no-border" placeholder="Search members">
                                         </div>
                                     </div>
                                 </form>

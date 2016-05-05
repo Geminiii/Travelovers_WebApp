@@ -10,11 +10,7 @@ session_start();
 ini_set('display_errors', 'On');
 
 include ('connectToDB.php');
-$link = mysqli_connect('localhost','root','root');
-if (!$link) {
-    die('Could not connect: ' . mysql_error());
-}
-mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
+
 ?>
 
 <!DOCTYPE html>
@@ -51,7 +47,7 @@ mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
         <a class="btn btn-link visible-xs" data-toggle="class:nav-off-screen,open" data-target="#nav,html">
           <i class="icon-list"></i>
         </a>
-        <a href="index.html" class="navbar-brand text-lt">
+        <a href="home.php" class="navbar-brand text-lt">
           <i class="icon-earphones"></i>
           <img src="images/logo.png" alt="." class="hide">
           <span class="hidden-nav-xs m-l-sm">Travelovers</span>
@@ -67,16 +63,21 @@ mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
           </a>
         </li>
       </ul>
-      <form class="navbar-form navbar-left input-s-lg m-t m-l-n-xs hidden-xs" role="search">
+
+
+      <form action="search.php" class="navbar-form navbar-left input-s-lg m-t m-l-n-xs hidden-xs" role="search">
         <div class="form-group">
           <div class="input-group">
             <span class="input-group-btn">
               <button type="submit" class="btn btn-sm bg-white btn-icon rounded"><i class="fa fa-search"></i></button>
             </span>
-            <input type="text" class="form-control input-sm no-border rounded" placeholder="Search songs, albums...">
+            <input name="search" type="text" class="form-control input-sm no-border rounded" placeholder="Search diaries, activities...">
           </div>
         </div>
       </form>
+
+
+
       <div class="navbar-right ">
         <ul class="nav navbar-nav m-n hidden-xs nav-user user">
           <li class="hidden-xs">
@@ -86,30 +87,7 @@ mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
             </a>
             <section class="dropdown-menu aside-xl animated fadeInUp">
               <section class="panel bg-white">
-                <div class="panel-heading b-light bg-light">
-                  <strong>You have <span class="count">2</span> notifications</strong>
-                </div>
-                <div class="list-group list-group-alt">
-                  <a href="#" class="media list-group-item">
-                    <span class="pull-left thumb-sm">
-                      <img src="images/a0.png" alt="..." class="img-circle">
-                    </span>
-                    <span class="media-body block m-b-none">
-                      Use awesome animate.css<br>
-                      <small class="text-muted">10 minutes ago</small>
-                    </span>
-                  </a>
-                  <a href="#" class="media list-group-item">
-                    <span class="media-body block m-b-none">
-1.0 initial released<br>
-                      <small class="text-muted">1 hour ago</small>
-                    </span>
-                  </a>
-                </div>
-                <div class="panel-footer text-sm">
-                  <a href="#" class="pull-right"><i class="fa fa-cog"></i></a>
-                  <a href="#notes" data-toggle="class:show animated fadeInRight">See all the notifications</a>
-                </div>
+
               </section>
             </section>
           </li>
@@ -118,7 +96,12 @@ mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
               <span class="thumb-sm avatar pull-right m-t-n-sm m-b-n-sm m-l-sm">
                 <img src="images/a0.png" alt="...">
               </span>
-John.Smith <b class="caret"></b>
+                <?php
+                    $myself="SELECT uname FROM User WHERE uid= '$_SESSION[uid]'";
+                    $res=mysqli_fetch_assoc(mysqli_query($link, $myself));
+                    echo $res['uname'];
+                ?>
+        <b class="caret"></b>
             </a>
             <ul class="dropdown-menu animated fadeInRight">
               <li>
@@ -126,20 +109,12 @@ John.Smith <b class="caret"></b>
                 <a href="#">Settings</a>
               </li>
               <li>
-                <a href="profile.html">Profile</a>
+                <a href="myProfile.php">Profile</a>
               </li>
-              <li>
-                <a href="#">
-                  <span class="badge bg-danger pull-right">3</span>
-Notifications
-                </a>
-              </li>
-              <li>
-                <a href="docs.html">Help</a>
-              </li>
+
               <li class="divider"></li>
               <li>
-                <a href="modal.lockme.html" data-toggle="ajaxModal" >Logout</a>
+                <a href="signin.php" data-toggle="ajaxModal" >Logout</a>
               </li>
             </ul>
           </li>
@@ -168,112 +143,30 @@ Discover
                         <span class="font-bold">What's new</span>
                       </a>
                     </li>
+                      <li>
+                          <a href="myProfile.php">
+                              <i class="icon-notebook icon text-info"></i>
+                              <span class="font-bold">Profile</span>
+                          </a>
+                      </li>
                     <li>
-                      <a href="genres.html">
-                        <i class="icon-music-tone-alt icon text-info"></i>
-                        <span class="font-bold">Genres</span>
+                      <a href="post.php">
+                        <i class="icon-pencil icon text-info"></i>
+                        <span class="font-bold">Post Diary</span>
                       </a>
                     </li>
+
                     <li>
-                      <a href="events.html">
+                      <a href="postActivities.php">
                         <i class="icon-drawer icon text-primary-lter"></i>
-                        <b class="badge bg-primary pull-right">6</b>
-                        <span class="font-bold">Activities</span>
+                        <span class="font-bold">Post Activity</span>
                       </a>
                     </li>
 
 
                     <li class="m-b hidden-nav-xs"></li>
                   </ul>
-                  <ul class="nav" data-ride="collapse">
 
-
-                    <li >
-                      <a href="#" class="auto">
-                        <span class="pull-right text-muted">
-                          <i class="fa fa-angle-left text"></i>
-                          <i class="fa fa-angle-down text-active"></i>
-                        </span>
-                        <i class="icon-chemistry icon">
-                        </i>
-                        <span>UI Kit</span>
-                      </a>
-                      <ul class="nav dk text-sm">
-
-
-
-
-                        <li >
-                          <a href="timeline.html" class="auto">
-                            <i class="fa fa-angle-right text-xs"></i>
-
-                            <span>Timeline</span>
-                          </a>
-                        </li>
-                      </ul>
-                    </li>
-                    <li >
-                      <a href="#" class="auto">
-                        <span class="pull-right text-muted">
-                          <i class="fa fa-angle-left text"></i>
-                          <i class="fa fa-angle-down text-active"></i>
-                        </span>
-                        <i class="icon-grid icon">
-                        </i>
-                        <span>Pages</span>
-                      </a>
-                      <ul class="nav dk text-sm">
-                        <li >
-                          <a href="profile.html" class="auto">
-                            <i class="fa fa-angle-right text-xs"></i>
-
-                            <span>Profile</span>
-                          </a>
-                        </li>
-                        <li >
-                          <a href="blog.html" class="auto">
-                            <i class="fa fa-angle-right text-xs"></i>
-
-                            <span>Blog</span>
-                          </a>
-                        </li>
-
-                        <li >
-                          <a href="gmap.html" class="auto">
-                            <i class="fa fa-angle-right text-xs"></i>
-
-                            <span>Google Map</span>
-                          </a>
-                        </li>
-                        <li >
-                          <a href="jvectormap.html" class="auto">
-                            <i class="fa fa-angle-right text-xs"></i>
-
-                            <span>Vector Map</span>
-                          </a>
-                        </li>
-                        <li >
-                          <a href="signin.php" class="auto">
-                            <i class="fa fa-angle-right text-xs"></i>
-
-                            <span>Signin</span>
-                          </a>
-                        </li>
-                        <li >
-                          <a href="signup.html" class="auto">
-                            <i class="fa fa-angle-right text-xs"></i>
-
-                            <span>Signup</span>
-                          </a>
-                        </li>
-                        <li >
-                          <a href="404.html" class="auto">
-                            <i class="fa fa-angle-right text-xs"></i>
-
-                            <span>404</span>
-                          </a>
-                        </li>
-                      </ul>
                     </li>
                   </ul>
                 </nav>
@@ -281,46 +174,6 @@ Discover
               </div>
             </section>
 
-            <footer class="footer hidden-xs no-padder text-center-nav-xs">
-              <div class="bg hidden-xs ">
-                  <div class="dropdown dropup wrapper-sm clearfix">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                      <span class="thumb-sm avatar pull-left m-l-xs">
-                        <img src="images/a3.png" class="dker" alt="...">
-                        <i class="on b-black"></i>
-                      </span>
-                      <span class="hidden-nav-xs clear">
-                        <span class="block m-l">
-                          <strong class="font-bold text-lt">John.Smith</strong>
-                          <b class="caret"></b>
-                        </span>
-                        <span class="text-muted text-xs block m-l">Art Director</span>
-                      </span>
-                    </a>
-                    <ul class="dropdown-menu animated fadeInRight aside text-left">
-                      <li>
-                        <span class="arrow bottom hidden-nav-xs"></span>
-                        <a href="#">Settings</a>
-                      </li>
-                      <li>
-                        <a href="profile.html">Profile</a>
-                      </li>
-                      <li>
-                        <a href="#">
-                          <span class="badge bg-danger pull-right">3</span>
-                          Notifications
-                        </a>
-                      </li>
-                      <li>
-                        <a href="docs.html">Help</a>
-                      </li>
-                      <li class="divider"></li>
-                      <li>
-                        <a href="modal.lockme.html" data-toggle="ajaxModal" >Logout</a>
-                      </li>
-                    </ul>
-                  </div>
-                </div>            </footer>
           </section>
         </aside>
         <!-- /.aside -->
@@ -341,13 +194,13 @@ Discover
                     <header height="300px" line-height="200px" text-align="center" background="#303e49">
                        <h1 >Timeline</h1>
                     </header>
-                    <div>
+                    <br>
 <?php
-$display = "SELECT uname, pid, uid, ptime, lname, title, text, image, video
+$display = "SELECT uname, pid, uid, ptime, lname, title, text, image, video, activity
 FROM Post NATURAL JOIN Location NATURAL JOIN Profile NATURAL JOIN User
-WHERE uid IN (SELECT uid2 FROM Friendship WHERE uid1=1) 
+WHERE uid IN (SELECT uid2 FROM Friendship WHERE uid1=$_SESSION[uid]) 
 AND ptime >= last_signin
-AND visibility = 3
+AND visibility > 0
 ORDER BY ptime DESC;";
 
 //
@@ -355,54 +208,23 @@ ORDER BY ptime DESC;";
 $result = mysqli_query($link, $display);
 while($res1=mysqli_fetch_assoc($result)){
     //$image = $res1['image'];
-    $_SESSION = $res1['pid'];
+    $_SESSION['pid'] = $res1['pid'];
     $pid = $res1['pid'];
     echo '<div class="cd-timeline-block">';
-    echo '<div class="cd-timeline-img cd-picture"><img src="images/cd-icon-picture.svg" alt="Picture"></div>';
+    if($res1['activity']==0){echo '<div class="cd-timeline-img cd-picture"><img src="images/cd-icon-picture.svg" alt="Picture"></div>';}
+    if($res1['activity']==1){echo '<div class="cd-timeline-img cd-picture"><img src="images/cd-icon-location.svg" alt="Picture"></div>';}
+
     echo '<div class="cd-timeline-content">';
-    echo "<h2>$res1[title]</h2><br>";
+    if($res1['activity']==0){echo "<h2>$res1[title]</h2><br>";}
+    if($res1['activity']==1){echo "<h2>Activity: $res1[title]</h2><br>";}
     echo "<h5>by  $res1[uname]</h5>";
     echo "<p>$res1[text]</p>";
     $image = base64_encode($res1['image']);
     echo "<img class=\"r r-2x img-full\" src='data:image/x-icon;base64, $image'/>";
-    /*echo "<form>
-                    <div class=\"form-group\">
-                      <label>Comment</label>
-                      <textarea class=\"form-control\" rows=\"2\" placeholder=\"Type your comment\"></textarea>
-                    </div>
-                    <div class=\"form-group\">
-                      <button type=\"submit\" class=\"btn btn-success\">Submit comment</button>
-                    </div>
-                  </form>";*/
     echo '<a href=\display.php?pid='.$pid.' class="cd-read-more">Read more</a>';
     echo "<span class='cd-date'>$res1[ptime]</span></div></div>";}
 ?>
 
-                      <div class="cd-timeline-block">
-                        <div class="cd-timeline-img cd-picture">
-                            <img src="images/cd-icon-picture.svg" alt="Picture">
-                        </div> <!-- cd-timeline-img -->
-
-                        <div class="cd-timeline-content">
-                            <h2>Title of section 1</h2>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iusto, optio, dolorum provident rerum aut hic quasi placeat iure tempora laudantium ipsa ad debitis unde? Iste voluptatibus minus veritatis qui ut.</p>
-                            <a href="#0" class="cd-read-more">Read more</a>
-                            <span class="cd-date">Jan 14</span>
-                        </div> <!-- cd-timeline-content -->
-                      </div> <!-- cd-timeline-block -->
-
-                      <div class="cd-timeline-block">
-                          <div class="cd-timeline-img cd-movie">
-                              <img src="images/cd-icon-movie.svg" alt="Movie">
-                          </div> <!-- cd-timeline-img -->
-
-                          <div class="cd-timeline-content">
-                              <h2>Title of section 2</h2>
-                              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iusto, optio, dolorum provident rerum aut hic quasi placeat iure tempora laudantium ipsa ad debitis unde?</p>
-                              <a href="#0" class="cd-read-more">Read more</a>
-                              <span class="cd-date">Jan 18</span>
-                          </div> <!-- cd-timeline-content -->
-                      </div> <!-- cd-timeline-block -->
 
                   </section>
 
@@ -437,136 +259,44 @@ while($res1=mysqli_fetch_assoc($result)){
                 <section class="w-f-md scrollable hover">
                   <h4 class="font-thin m-l-md m-t">Connected</h4>
                   <ul class="list-group no-bg no-borders auto m-t-n-xxs">
-                    <li class="list-group-item">
-                      <span class="pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm">
-                        <img src="images/a1.png" alt="..." class="img-circle">
-                        <i class="on b-light right sm"></i>
+                      <?php
+                      if($_SERVER["REQUEST_METHOD"] == "POST") {
+                          $searchMem = $_POST['searchMem'];
+                          if ($searchMem) {
+                              $friendList = "SELECT uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid AND Uname LIKE '%$searchMem%'";
+                          }else {
+                              $friendList = "SELECT uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid";
+                          }
+                      }else {
+                          $friendList = "SELECT uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid";
+                      }
+                          $result = mysqli_query($link, $friendList);
+                          while ($res1 = mysqli_fetch_assoc($result)) {
+                              echo "<li class=\"list-group-item\">
+                      <span class=\"pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm\">
+                        <img src=\"images/a1.png\" alt=\"...\" class=\"img-circle\">
+                        <i class=\"on b-light right sm\"></i>
                       </span>
-                      <div class="clear">
-                        <div><a href="#">Chris Fox</a></div>
-                        <small class="text-muted">New York</small>
+                      <div class=\"clear\">
+                        <div><a href=\"#\">$res1[uname]</a></div>
+                        <small class=\"text-muted\">$res1[city]</small>
                       </div>
-                    </li>
-                    <li class="list-group-item">
-                      <span class="pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm">
-                        <img src="images/a2.png" alt="...">
-                        <i class="on b-light right sm"></i>
-                      </span>
-                      <div class="clear">
-                        <div><a href="#">Amanda Conlan</a></div>
-                        <small class="text-muted">France</small>
-                      </div>
-                    </li>
-                    <li class="list-group-item">
-                      <span class="pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm">
-                        <img src="images/a3.png" alt="...">
-                        <i class="busy b-light right sm"></i>
-                      </span>
-                      <div class="clear">
-                        <div><a href="#">Dan Doorack</a></div>
-                        <small class="text-muted">Hamburg</small>
-                      </div>
-                    </li>
-                    <li class="list-group-item">
-                      <span class="pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm">
-                        <img src="images/a4.png" alt="...">
-                        <i class="away b-light right sm"></i>
-                      </span>
-                      <div class="clear">
-                        <div><a href="#">Lauren Taylor</a></div>
-                        <small class="text-muted">London</small>
-                      </div>
-                    </li>
-                    <li class="list-group-item">
-                      <span class="pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm">
-                        <img src="images/a5.png" alt="..." class="img-circle">
-                        <i class="on b-light right sm"></i>
-                      </span>
-                      <div class="clear">
-                        <div><a href="#">Chris Fox</a></div>
-                        <small class="text-muted">Milan</small>
-                      </div>
-                    </li>
-                    <li class="list-group-item">
-                      <span class="pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm">
-                        <img src="images/a6.png" alt="...">
-                        <i class="on b-light right sm"></i>
-                      </span>
-                      <div class="clear">
-                        <div><a href="#">Amanda Conlan</a></div>
-                        <small class="text-muted">Copenhagen</small>
-                      </div>
-                    </li>
-                    <li class="list-group-item">
-                      <span class="pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm">
-                        <img src="images/a7.png" alt="...">
-                        <i class="busy b-light right sm"></i>
-                      </span>
-                      <div class="clear">
-                        <div><a href="#">Dan Doorack</a></div>
-                        <small class="text-muted">Barcelona</small>
-                      </div>
-                    </li>
-                    <li class="list-group-item">
-                      <span class="pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm">
-                        <img src="images/a8.png" alt="...">
-                        <i class="away b-light right sm"></i>
-                      </span>
-                      <div class="clear">
-                        <div><a href="#">Lauren Taylor</a></div>
-                        <small class="text-muted">Tokyo</small>
-                      </div>
-                    </li>
-                    <li class="list-group-item">
-                      <span class="pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm">
-                        <img src="images/a9.png" alt="..." class="img-circle">
-                        <i class="on b-light right sm"></i>
-                      </span>
-                      <div class="clear">
-                        <div><a href="#">Chris Fox</a></div>
-                        <small class="text-muted">UK</small>
-                      </div>
-                    </li>
-                    <li class="list-group-item">
-                      <span class="pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm">
-                        <img src="images/a1.png" alt="...">
-                        <i class="on b-light right sm"></i>
-                      </span>
-                      <div class="clear">
-                        <div><a href="#">Amanda Conlan</a></div>
-                        <small class="text-muted">Africa</small>
-                      </div>
-                    </li>
-                    <li class="list-group-item">
-                      <span class="pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm">
-                        <img src="images/a2.png" alt="...">
-                        <i class="busy b-light right sm"></i>
-                      </span>
-                      <div class="clear">
-                        <div><a href="#">Dan Doorack</a></div>
-                        <small class="text-muted">Paris</small>
-                      </div>
-                    </li>
-                    <li class="list-group-item">
-                      <span class="pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm">
-                        <img src="images/a3.png" alt="...">
-                        <i class="away b-light right sm"></i>
-                      </span>
-                      <div class="clear">
-                        <div><a href="#">Lauren Taylor</a></div>
-                        <small class="text-muted">Brussels</small>
-                      </div>
-                    </li>
+                    </li>";
+
+                      }
+                      ?>
+
+
                   </ul>
                 </section>
                 <footer class="footer footer-md bg-black">
-                  <form class="" role="search">
+                  <form method="post" action="home.php" class="" role="search">
                     <div class="form-group clearfix m-b-none">
                       <div class="input-group m-t m-b">
                         <span class="input-group-btn">
-                          <button type="submit" class="btn btn-sm bg-empty text-muted btn-icon"><i class="fa fa-search"></i></button>
+                          <button  type="submit" class="btn btn-sm bg-empty text-muted btn-icon"><i class="fa fa-search"></i></button>
                         </span>
-                        <input type="text" class="form-control input-sm text-white bg-empty b-b b-dark no-border" placeholder="Search members">
+                        <input name="searchMem" type="text" class="form-control input-sm text-white bg-empty b-b b-dark no-border" placeholder="Search members">
                       </div>
                     </div>
                   </form>

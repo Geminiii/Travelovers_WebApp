@@ -16,6 +16,13 @@ if (!$link) {
     die('Could not connect: ' . mysql_error());
 }
 mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");*/
-$comment = "INSERT INTO Comment() VALUES ()";
+$text = $_POST['text'];
+$uid=$_SESSION['uid'];
+$pid=$_SESSION['pid'];
+$comment = "INSERT INTO Comment(cid, uid, pid, ctime, text, image, c_viewed) VALUES (NULL, '$uid', '$pid', NULL, '$text', NULL, 0)";
 
-
+if(mysqli_query($link, $comment)){
+    header("Location:/display.php?pid=$pid");
+}else{
+    echo $comment;
+}

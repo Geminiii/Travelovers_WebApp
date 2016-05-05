@@ -32,7 +32,7 @@ $title = $diary = $picture = $video = $select='';
 
         $select = $_POST['visibility'];
 
-        $post="INSERT INTO Post(pid, uid, ptime, lid, title, text, image, video, visibility) VALUES (NULL,".$_SESSION["uid"].",NULL,0, '$title', '$diary', '{$picture}', '{$video}', $select)";
+        $post="INSERT INTO Post(pid, uid, ptime, lid, title, text, image, video, visibility, activity) VALUES (NULL,".$_SESSION["uid"].",NULL,0, '$title', '$diary', '{$picture}', '{$video}', $select, 0)";
         if(mysqli_query($link, $post)===TRUE){
             echo "Successfully";
         }else{
@@ -84,7 +84,7 @@ $title = $diary = $picture = $video = $select='';
             <input type="radio" name = "visibility" value="0"> Only I can see<br>
     </div>
     <div class="form-group">
-        <button type="submit" class="btn btn-success">Submit comment</button>
+        <button type="submit" class="btn btn-success">Submit</button>
     </div>
 </form>
 <footer id="footer">

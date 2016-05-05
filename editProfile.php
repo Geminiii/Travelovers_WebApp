@@ -29,7 +29,7 @@ if(!isset($_SESSION['uid'])){
 		$profileResult = mysqli_query($conn, $updateProfileQuery);
 		$updateCity = "UPDATE User SET city='$city' WHERE uid = '$uid'";
 		$cityResult = mysqli_query($conn, $updateCity);
-		if($profileResult && $cityResult){
+		if($profileResult || $cityResult){
 
 			header("refresh:3;url = myProfile.php");
 			echo 'Your Profile Has been Updated';
