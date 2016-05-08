@@ -11,7 +11,7 @@ ini_set('display_errors', 'On');
 
 include('connectToDB.php');
 
-$title = $activity = $picture = $video = $select='';
+$title = $activity = $picture = $video = $select=$lname='';
 
 if($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($_POST["title"])) {
@@ -19,7 +19,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     }else{
         $title=$_POST["title"];
     }
-
+    $lname = $_POST['lname'];
     $activity = $_POST["activity"];
     $pictureFileName = $_FILES['picture']['tmp_name'];
     $videoFileName = $_FILES['video']['tmp_name'];
@@ -28,7 +28,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $select = $_POST['visibility'];
 
-    $post="INSERT INTO Post(pid, uid, ptime, lid, title, text, image, video, visibility, activity) VALUES (NULL,".$_SESSION["uid"].",NULL,0, '$title', '$activity', '{$picture}', '{$video}', '$select', 1)";
+    $post="INSERT INTO Post(pid, uid, ptime, lname, title, text, image, video, visibility, activity) VALUES (NULL,".$_SESSION["uid"].",NULL, '$lname', '$title', '$activity', '{$picture}', '{$video}', '$select', 1)";
     if(mysqli_query($link, $post)==TRUE){
         header('Location:/home.php');
     }else{
@@ -71,8 +71,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
             <a class="btn btn-link visible-xs" data-toggle="class:nav-off-screen,open" data-target="#nav,html">
                 <i class="icon-list"></i>
             </a>
-            <a href="index.html" class="navbar-brand text-lt">
-                <i class="icon-earphones"></i>
+            <a href="home.php" class="navbar-brand text-lt">
+                <i class="fa fa-globe"></i>
                 <img src="images/logo.png" alt="." class="hide">
                 <span class="hidden-nav-xs m-l-sm">Travelovers</span>
             </a>
@@ -105,12 +105,43 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="navbar-right ">
             <ul class="nav navbar-nav m-n hidden-xs nav-user user">
                 <li class="hidden-xs">
-                    <a href="#" class="dropdown-toggle lt" data-toggle="dropdown">
+                    <a href=" " class="dropdown-toggle lt" data-toggle="dropdown">
                         <i class="icon-bell"></i>
-                        <span class="badge badge-sm up bg-danger count">2</span>
-                    </a>
+                        <?php
+                        $requestCount = 0;
+                        $request = "SELECT uid1,uname from Friendship, User where Friendship.uid1 = user.uid and uid2 = $_SESSION[uid] and status = 0;";
+                        $result = mysqli_query($link, $request);
+                        while($res1=mysqli_fetch_assoc($result)){
+                            $requestCount++;
+                        }
+                        ?>
+                        <span class="badge badge-sm up bg-danger count"><?php echo $requestCount; ?></span>
+                    </a >
                     <section class="dropdown-menu aside-xl animated fadeInUp">
                         <section class="panel bg-white">
+                            <div class="panel-heading b-light bg-light">
+
+                                <strong>You have <span class="count" style="display: inline;"><?php echo $requestCount; ?></span> friend requests</strong>
+                            </div>
+                            <div class="list-group list-group-alt">
+                                <?php
+                                // get number of friend request
+                                $result = mysqli_query($link, $request);
+                                if($result){
+                                    while($res2=mysqli_fetch_assoc($result)){
+
+                                        echo '<div class="media list-group-item" style="display: block;">';
+                                        echo '<span class="pull-left thumb-sm text-center col-sm-3">
+                              <i class=" icon-user-follow i-lg"></i>
+                          </span>';
+                                        echo '<span class="media-body block m-b-none col-sm-7">'.$res2['uname'].' wants to be your friend &nbsp</span>
+                            <div class="col-sm-1"><form action = "acceptFriendRequest.php" method = "POST"><button type="submit" name="accept" value="'.$res2['uid1'].'" ><i class="icon-check"></i></button></form></div>
+                            <div class="col-sm-1"><form action = "declineFriendRequest.php" method = "POST"><button type="submit" name="decline" value="'.$res2['uid1'].'" ><i class="icon-close"></i></button></form></div>';
+                                        echo '</div>';
+                                    }
+                                }
+                                ?>
+                            </div>
 
                         </section>
                     </section>
@@ -138,7 +169,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 
                         <li class="divider"></li>
                         <li>
-                            <a href="modal.lockme.html" data-toggle="ajaxModal" >Logout</a>
+                            <a href="signin.php">Logout</a>
                         </li>
                     </ul>
                 </li>
@@ -186,6 +217,18 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <span class="font-bold">Post Activity</span>
                                         </a>
                                     </li>
+                                    <li>
+                                        <a href="footprint.php">
+                                            <i class="icon-pin icon text-primary-lter"></i>
+                                            <span class="font-bold">Foot Print</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="addFriend.php">
+                                            <i class="icon-user icon text-primary-lter"></i>
+                                            <span class="font-bold">New Friend</span>
+                                        </a>
+                                    </li>
 
 
                                     <li class="m-b hidden-nav-xs"></li>
@@ -222,24 +265,120 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <form method="POST" action="postActivities.php" enctype="multipart/form-data">
     <div class="form-group pull-in clearfix" >
-        <div class="col-sm-6">
+        <div class="col-sm-6  pull-in clearfix">
             <label>Title</label>
             <input name="title" type="text" class="form-control" placeholder="Title">
         </div>
     </div>
-    <div class="form-group">
+    <div class="form-group  pull-in clearfix">
+        <div class="col-sm-6">
         <label>Activity description</label>
-        <textarea name="activity" class="form-control" cols="5" rows="5" placeholder="Description"></textarea>
+        <textarea name="activity" class="form-control" cols="5" rows="5" placeholder="Description"></textarea></div>
     </div>
-    <div class="form-group">
+    <div class="form-group  pull-in clearfix">
+        <div class="col-sm-6">
         <label>Select picture to upload</label>
-        <input name="picture" type="file"  class="form-control" placeholder="Picture">
+        <input name="picture" type="file"  class="form-control" placeholder="Picture"></div>
     </div>
-    <div class="form-group">
+    <div class="form-group  pull-in clearfix">
+        <div class="col-sm-6">
         <label>Select video to upload</label>
-        <input name="video" type="file" class="form-control" placeholder="Video">
+        <input name="video" type="file" class="form-control" placeholder="Video"></div>
     </div>
-    <div  class="form-group">
+
+    <div style='position:relative'>
+        <script type="text/javascript">
+            function loadmap() {
+                // initialize map
+                var map = new google.maps.Map(document.getElementById("map-canvas"), {
+                    center: new google.maps.LatLng(40.641, -74.020),
+                    zoom: 17,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                });
+                // initialize marker
+                var marker = new google.maps.Marker({
+                    position: map.getCenter(),
+                    draggable: true,
+                    map: map
+                });
+
+                // intercept map and marker movements
+                /*google.maps.event.addListener(map, "idle", function() {
+                 marker.setPosition(map.getCenter());
+                 //document.getElementById("map-output").innerHTML = "Latitude:  " + map.getCenter().lat().toFixed(6) + "<br>Longitude: " + map.getCenter().lng().toFixed(6) + "<br>Zoom:" + map.getZoom() ;
+                 document.myform.lati.value =  map.getCenter().lat().toFixed(4);
+                 document.myform.long.value =  map.getCenter().lng().toFixed(4);
+                 //console.log(map.getCenter().results[1]);
+                 });*/
+
+                google.maps.event.addListener(marker, "dragend", function(mapEvent) {
+                    map.panTo(mapEvent.latLng);
+                });
+
+                // initialize geocoder
+                var geocoder = new google.maps.Geocoder();
+                google.maps.event.addDomListener(document.getElementById("search-btn"), "click", function() {
+                    geocoder.geocode({ address: document.getElementById("search-txt").value }, function(results, status) {
+                        if (status == google.maps.GeocoderStatus.OK) {
+                            var result = results[0];
+                            document.getElementById("search-txt").value = result.formatted_address;
+                            document.myform.lname.value = result.formatted_address;
+                            if (result.geometry.viewport) {
+                                map.fitBounds(result.geometry.viewport);
+                            } else {
+                                map.setCenter(result.geometry.location);
+                            }
+                        } else if (status == google.maps.GeocoderStatus.ZERO_RESULTS) {
+                            alert("Sorry, geocoder API failed to locate the address.");
+                        } else {
+                            alert("Sorry, geocoder API failed with an error.");
+                        }
+                    });
+                });
+                google.maps.event.addDomListener(document.getElementById("search-txt"), "keydown", function(domEvent) {
+                    if (domEvent.which === 13 || domEvent.keyCode === 13) {
+                        google.maps.event.trigger(document.getElementById("search-btn"), "click");
+                    }
+                });
+
+                // initialize geolocation
+                if (navigator.geolocation) {
+                    google.maps.event.addDomListener(document.getElementById("detect-btn"), "click", function() {
+                        navigator.geolocation.getCurrentPosition(function(position) {
+                            map.setCenter(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
+                        }, function() {
+                            alert("Sorry, geolocation API failed to detect your location.");
+                        });
+                    });
+                    document.getElementById("detect-btn").disabled = false;
+                }
+            }
+
+        </script>
+        <?php #include('location.php');?>
+        <div id="map-search">
+            <input name="lname" id="search-txt"  type="text" value="348, 61st, Brooklyn, NY 11220 USA" maxlength="100">
+            <input id="search-btn" type="button" value="Locate Address">
+            <input id="detect-btn" type="button" value="Detect Location" disabled>
+        </div><br>
+        <div id="input-info">
+            <!--form action = "location.php" method="post" name="myform"-->
+                <input id="search-txt" type="hidden" placeholder="Name this new location" name="loname" maxlength="100">
+                <input id="submit-btn" type="hidden" value="PIN this Location">
+                <!--input type="hidden" name="lati"-->
+                <input type="hidden" name="long" >
+                <!--input type="hidden" name="lname"-->
+            <!--/form-->
+        </div>
+        <div id="map-canvas" style="height:300px;width:350px"></div>
+        <div id="map-output"></div>
+        <br>
+
+        </script>
+        <script src="https://maps.googleapis.com/maps/api/js? v=3&amp;sensor=false&amp;key=AIzaSyAv0lkA20J7N5lSHwS4mjklob4wUBajWL8&amp;callback=loadmap" defer ></script>
+    </div>
+
+    <div  style='position:relative' class="form-group">
         <label>Choose who can see</label><br>
         <input type="radio" name = "visibility" value="3" checked> Public<br>
         <input type="radio" name = "visibility" value="2"> Show to FOF<br>
@@ -278,55 +417,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
                         </section>
                     </section>
                     <!-- side content -->
-                    <aside class="aside-md bg-light dk" id="sidebar">
-                        <section class="vbox animated fadeInRight">
-                            <section class="w-f-md scrollable hover">
-                                <h4 class="font-thin m-l-md m-t">Connected</h4>
-                                <ul class="list-group no-bg no-borders auto m-t-n-xxs">
-                                    <?php
-                                    if($_SERVER["REQUEST_METHOD"] == "POST") {
-                                        $searchMem = $_POST['searchMem'];
-                                        if ($searchMem) {
-                                            $friendList = "SELECT uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid AND Uname LIKE '%$searchMem%'";
-                                        }else {
-                                            $friendList = "SELECT uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid";
-                                        }
-                                    }else {
-                                        $friendList = "SELECT uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid";
-                                    }
-                                    $result = mysqli_query($link, $friendList);
-                                    while ($res1 = mysqli_fetch_assoc($result)) {
-                                        echo "<li class=\"list-group-item\">
-                      <span class=\"pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm\">
-                        <img src=\"images/a1.png\" alt=\"...\" class=\"img-circle\">
-                        <i class=\"on b-light right sm\"></i>
-                      </span>
-                      <div class=\"clear\">
-                        <div><a href=\"#\">$res1[uname]</a></div>
-                        <small class=\"text-muted\">$res1[city]</small>
-                      </div>
-                    </li>";
 
-                                    }
-                                    ?>
-
-
-                                </ul>
-                            </section>
-                            <footer class="footer footer-md bg-black">
-                                <form method="post" action="home.php" class="" role="search">
-                                    <div class="form-group clearfix m-b-none">
-                                        <div class="input-group m-t m-b">
-                        <span class="input-group-btn">
-                          <button  type="submit" class="btn btn-sm bg-empty text-muted btn-icon"><i class="fa fa-search"></i></button>
-                        </span>
-                                            <input name="searchMem" type="text" class="form-control input-sm text-white bg-empty b-b b-dark no-border" placeholder="Search members">
-                                        </div>
-                                    </div>
-                                </form>
-                            </footer>
-                        </section>
-                    </aside>
                     <!-- / side content -->
                 </section>
                 <a href="#" class="hide nav-off-screen-block" data-toggle="class:nav-off-screen,open" data-target="#nav,html"></a>
@@ -340,7 +431,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 <!-- App -->
 <script src="js/app.js"></script>
 <script src="js/slimscroll/jquery.slimscroll.min.js"></script>
-<script src="js/app.plugin.js"></script>
+<!--script src="js/app.plugin.js"></script-->
 
 <script type="text/javascript" src="js/jPlayer/jquery.jplayer.min.js"></script>
 <script type="text/javascript" src="js/jPlayer/add-on/jplayer.playlist.min.js"></script>

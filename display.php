@@ -53,7 +53,7 @@ mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
                 <i class="icon-list"></i>
             </a>
             <a href="home.php" class="navbar-brand text-lt">
-                <i class="icon-earphones"></i>
+                <i class="fa fa-globe"></i>
                 <img src="images/logo.png" alt="." class="hide">
                 <span class="hidden-nav-xs m-l-sm">Travelovers</span>
             </a>
@@ -86,12 +86,43 @@ mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
         <div class="navbar-right ">
             <ul class="nav navbar-nav m-n hidden-xs nav-user user">
                 <li class="hidden-xs">
-                    <a href="#" class="dropdown-toggle lt" data-toggle="dropdown">
+                    <a href=" " class="dropdown-toggle lt" data-toggle="dropdown">
                         <i class="icon-bell"></i>
-                        <span class="badge badge-sm up bg-danger count">2</span>
-                    </a>
+                        <?php
+                        $requestCount = 0;
+                        $request = "SELECT uid1,uname from Friendship, User where Friendship.uid1 = user.uid and uid2 = $_SESSION[uid] and status = 0;";
+                        $result = mysqli_query($link, $request);
+                        while($res1=mysqli_fetch_assoc($result)){
+                            $requestCount++;
+                        }
+                        ?>
+                        <span class="badge badge-sm up bg-danger count"><?php echo $requestCount; ?></span>
+                    </a >
                     <section class="dropdown-menu aside-xl animated fadeInUp">
                         <section class="panel bg-white">
+                            <div class="panel-heading b-light bg-light">
+
+                                <strong>You have <span class="count" style="display: inline;"><?php echo $requestCount; ?></span> friend requests</strong>
+                            </div>
+                            <div class="list-group list-group-alt">
+                                <?php
+                                // get number of friend request
+                                $result = mysqli_query($link, $request);
+                                if($result){
+                                    while($res2=mysqli_fetch_assoc($result)){
+
+                                        echo '<div class="media list-group-item" style="display: block;">';
+                                        echo '<span class="pull-left thumb-sm text-center col-sm-3">
+                              <i class=" icon-user-follow i-lg"></i>
+                          </span>';
+                                        echo '<span class="media-body block m-b-none col-sm-7">'.$res2['uname'].' wants to be your friend &nbsp</span>
+                            <div class="col-sm-1"><form action = "acceptFriendRequest.php" method = "POST"><button type="submit" name="accept" value="'.$res2['uid1'].'" ><i class="icon-check"></i></button></form></div>
+                            <div class="col-sm-1"><form action = "declineFriendRequest.php" method = "POST"><button type="submit" name="decline" value="'.$res2['uid1'].'" ><i class="icon-close"></i></button></form></div>';
+                                        echo '</div>';
+                                    }
+                                }
+                                ?>
+                            </div>
 
                         </section>
                     </section>
@@ -168,6 +199,18 @@ mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
                                             <span class="font-bold">Post Activity</span>
                                         </a>
                                     </li>
+                                    <li>
+                                        <a href="footprint.php">
+                                            <i class="icon-pin icon text-primary-lter"></i>
+                                            <span class="font-bold">Foot Print</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href=" ">
+                                            <i class="icon-user icon text-primary-lter"></i>
+                                            <span class="font-bold">New Friend</span>
+                                        </a >
+                                    </li>
 
 
                                     <li class="m-b hidden-nav-xs"></li>
@@ -197,7 +240,7 @@ mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
 
                                     <div class="cd-timeline-content">
 <?php
-$display = "SELECT uname, uid, ptime, lname, title, text, image, video, activity FROM Post NATURAL JOIN Location NATURAL JOIN Profile NATURAL JOIN User WHERE pid= '$_GET[pid]';";
+$display = "SELECT uname, uid, ptime, lname, title, text, image, video, activity FROM Post  NATURAL JOIN Profile NATURAL JOIN User WHERE pid= '$_GET[pid]';";
 $_SESSION['pid']=$_GET['pid'];
 $result=mysqli_query($link, $display);
 $res1=mysqli_fetch_assoc($result);
@@ -218,15 +261,16 @@ $res4=mysqli_fetch_assoc($dislike);
                                         <h2><?php echo $res1['title'];?></h2><br>
                                         <h5>by  <?php echo $res1['uname']." at ".$res1['ptime'];?></h5><br>
                                         <?php
+                                            echo "<i class='icon-pin'></i>"." at $res1[lname]"."<br>";
                                             if($res1['activity']==1){
-                                                echo "<a href='join.php'><img src='images/images.png'></a>";
-                                            }
+                                                echo "<br><a href='join.php'><img src='images/images.png'></a>";
+
 
                                             $counter="SELECT COUNT(*) c FROM Join_activity WHERE pid = $_SESSION[pid]";
                                             $res4=mysqli_fetch_assoc(mysqli_query($link, $counter));
-                                            echo "$res4[c] people also joined this activity";
+                                            echo "$res4[c] people also joined this activity";}
                                             ?>
-                                        <br>
+
 
                                         <p><?php echo $res1['text'];?></p>
                                         <img class="r r-2x img-full" src='data:image/x-icon;base64, <?php echo $image;?>'/>
@@ -289,48 +333,7 @@ $res4=mysqli_fetch_assoc($dislike);
                         </section>
                     </section>
                     <!-- side content -->
-                    <aside class="aside-md bg-light dk" id="sidebar">
-                        <section class="vbox animated fadeInRight">
-                            <section class="w-f-md scrollable hover">
-                                <h4 class="font-thin m-l-md m-t">Connected</h4>
-                                <ul class="list-group no-bg no-borders auto m-t-n-xxs">
-                                    <?php
-                                    $friendList="SELECT uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid";
-                                    $result = mysqli_query($link, $friendList);
-                                    while($res1=mysqli_fetch_assoc($result)){
-                                        echo "<li class=\"list-group-item\">
-                      <span class=\"pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm\">
-                        <img src=\"images/a1.png\" alt=\"...\" class=\"img-circle\">
-                        <i class=\"on b-light right sm\"></i>
-                      </span>
-                      <div class=\"clear\">
-                        <div><a href=\"#\">$res1[uname]</a></div>
-                        <small class=\"text-muted\">$res1[city]</small>
-                      </div>
-                    </li>";
-                                    }
-                                    ?>
 
-
-
-
-
-                                </ul>
-                            </section>
-                            <footer class="footer footer-md bg-black">
-                                <form class="" role="search">
-                                    <div class="form-group clearfix m-b-none">
-                                        <div class="input-group m-t m-b">
-                        <span class="input-group-btn">
-                          <button type="submit" class="btn btn-sm bg-empty text-muted btn-icon"><i class="fa fa-search"></i></button>
-                        </span>
-                                            <input type="text" class="form-control input-sm text-white bg-empty b-b b-dark no-border" placeholder="Search members">
-                                        </div>
-                                    </div>
-                                </form>
-                            </footer>
-                        </section>
-                    </aside>
                     <!-- / side content -->
                 </section>
                 <a href="#" class="hide nav-off-screen-block" data-toggle="class:nav-off-screen,open" data-target="#nav,html"></a>
@@ -344,7 +347,7 @@ $res4=mysqli_fetch_assoc($dislike);
 <!-- App -->
 <script src="js/app.js"></script>
 <script src="js/slimscroll/jquery.slimscroll.min.js"></script>
-<script src="js/app.plugin.js"></script>
+<!--script src="js/app.plugin.js"></script-->
 
 <script type="text/javascript" src="js/jPlayer/jquery.jplayer.min.js"></script>
 <script type="text/javascript" src="js/jPlayer/add-on/jplayer.playlist.min.js"></script>

@@ -37,11 +37,11 @@
   		if (!($unameErr || $emailErr || $passwordErr || $unameErr )) {
   			$createNewUser = "INSERT INTO User(uid, password, uname, city, birthdate, signup_time, signup_email) VALUES (NULL, '$password', '$uname','$city', '$birthdate', NULL, '$email')";
 	    	if (mysqli_query($link, $createNewUser) ===TRUE){
-	    		echo "New record created successfully";
+
                 $selectNewUid = "SELECT uid FROM User WHERE signup_email ='$email'";
                 $result = $link->query($selectNewUid);
                 $newUserUid = $result->fetch_array();
-                echo "$newUserUid";
+
                 $createUserProfile = "INSERT INTO Profile(uid, tel, biography, photo, visibility, last_signin) VALUES ('".$newUserUid[0]."', NULL, NULL, NULL, 3, CURRENT_TIMESTAMP )";
                 mysqli_query($link, $createUserProfile);
 

@@ -45,7 +45,7 @@ include ('connectToDB.php');
                 <a class="btn btn-link visible-xs" data-toggle="class:nav-off-screen,open" data-target="#nav,html">
                     <i class="icon-list"></i>
                 </a>
-                <a href="index.html" class="navbar-brand text-lt">
+                <a href="home.php" class="navbar-brand text-lt">
                     <i class="icon-earphones"></i>
                     <img src="images/logo.png" alt="." class="hide">
                     <span class="hidden-nav-xs m-l-sm">Travelovers</span>
@@ -83,14 +83,23 @@ include ('connectToDB.php');
                             <i class="icon-bell"></i>
                             <span class="badge badge-sm up bg-danger count">2</span>
                         </a>
+                        <section class="dropdown-menu aside-xl animated fadeInUp">
+                            <section class="panel bg-white">
 
+                            </section>
+                        </section>
                     </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle bg clear" data-toggle="dropdown">
               <span class="thumb-sm avatar pull-right m-t-n-sm m-b-n-sm m-l-sm">
                 <img src="images/a0.png" alt="...">
               </span>
-                            John.Smith <b class="caret"></b>
+                            <?php
+                            $myself="SELECT uname FROM User WHERE uid= '$_SESSION[uid]'";
+                            $res=mysqli_fetch_assoc(mysqli_query($link, $myself));
+                            echo $res['uname'];
+                            ?>
+                            <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu animated fadeInRight">
                             <li>
@@ -98,20 +107,12 @@ include ('connectToDB.php');
                                 <a href="#">Settings</a>
                             </li>
                             <li>
-                                <a href="profile.html">Profile</a>
+                                <a href="myProfile.php">Profile</a>
                             </li>
-                            <li>
-                                <a href="#">
-                                    <span class="badge bg-danger pull-right">3</span>
-                                    Notifications
-                                </a>
-                            </li>
-                            <li>
-                                <a href="docs.html">Help</a>
-                            </li>
+
                             <li class="divider"></li>
                             <li>
-                                <a href="modal.lockme.html" data-toggle="ajaxModal" >Logout</a>
+                                <a href="signin.php" data-toggle="ajaxModal" >Logout</a>
                             </li>
                         </ul>
                     </li>
@@ -198,12 +199,13 @@ include ('connectToDB.php');
 $entry=$_GET['search'];
 
 $search = "SELECT uname, pid, uid, ptime, lname, title, text, image, video
-FROM Post NATURAL JOIN Location NATURAL JOIN Profile NATURAL JOIN User
+FROM Post NATURAL JOIN Profile NATURAL JOIN User
 WHERE uid IN (SELECT uid2 FROM Friendship WHERE uid1=$_SESSION[uid]) 
 AND ptime >= last_signin
 AND visibility > 0
 AND (text LIKE '%$entry%'
-OR title LIKE '%$entry%')
+OR title LIKE '%$entry%'
+OR uname LIKE '%entry%')
 ORDER BY ptime DESC;";
 
 $result = mysqli_query($link, $search);
@@ -251,47 +253,7 @@ while($res1=mysqli_fetch_assoc($result)){
                             </section>
                         </section>
                         <!-- side content -->
-                        <aside class="aside-md bg-light dk" id="sidebar">
-                            <section class="vbox animated fadeInRight">
-                                <section class="w-f-md scrollable hover">
-                                    <h4 class="font-thin m-l-md m-t">Connected</h4>
-                                    <ul class="list-group no-bg no-borders auto m-t-n-xxs">
-                                        <?php
 
-                      if($_POST['searchMem']){
-                          $searchMem=$_POST['searchMem'];
-                          $friendList="SELECT uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid AND Uname LIKE '%$searchMem%'";
-                      }else{
-                          $friendList="SELECT uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid";}                                        $result = mysqli_query($link, $friendList);
-                                        while($res1=mysqli_fetch_assoc($result)){
-                                            echo "<li class=\"list-group-item\">
-                      <span class=\"pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm\">
-                        <img src=\"images/a1.png\" alt=\"...\" class=\"img-circle\">
-                        <i class=\"on b-light right sm\"></i>
-                      </span>
-                      <div class=\"clear\">
-                        <div><a href=\"#\">$res1[uname]</a></div>
-                        <small class=\"text-muted\">$res1[city]</small>
-                      </div>
-                    </li>";
-                                        }
-                                        ?>
-                                    </ul>
-                                </section>
-                                <footer class="footer footer-md bg-black">
-                                    <form method="post" action="search.php" role="search">
-                                        <div class="form-group clearfix m-b-none">
-                                            <div class="input-group m-t m-b">
-                        <span class="input-group-btn">
-                          <button type="submit" class="btn btn-sm bg-empty text-muted btn-icon"><i class="fa fa-search"></i></button>
-                        </span>
-                                                <input type="text" class="form-control input-sm text-white bg-empty b-b b-dark no-border" placeholder="Search members">
-                                            </div>
-                                        </div>
-                                    </form>
-                                </footer>
-                            </section>
-                        </aside>
                         <!-- / side content -->
                     </section>
                     <a href="#" class="hide nav-off-screen-block" data-toggle="class:nav-off-screen,open" data-target="#nav,html"></a>

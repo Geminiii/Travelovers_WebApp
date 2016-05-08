@@ -48,7 +48,7 @@ include ('connectToDB.php');
           <i class="icon-list"></i>
         </a>
         <a href="home.php" class="navbar-brand text-lt">
-          <i class="icon-earphones"></i>
+          <i class="fa fa-globe"></i>
           <img src="images/logo.png" alt="." class="hide">
           <span class="hidden-nav-xs m-l-sm">Travelovers</span>
         </a>
@@ -81,15 +81,46 @@ include ('connectToDB.php');
       <div class="navbar-right ">
         <ul class="nav navbar-nav m-n hidden-xs nav-user user">
           <li class="hidden-xs">
-            <a href="#" class="dropdown-toggle lt" data-toggle="dropdown">
-              <i class="icon-bell"></i>
-              <span class="badge badge-sm up bg-danger count">2</span>
-            </a>
-            <section class="dropdown-menu aside-xl animated fadeInUp">
-              <section class="panel bg-white">
+              <a href=" " class="dropdown-toggle lt" data-toggle="dropdown">
+                  <i class="icon-bell"></i>
+                  <?php
+                  $requestCount = 0;
+                  $request = "SELECT uid1,uname from Friendship, User where Friendship.uid1 = user.uid and uid2 = $_SESSION[uid] and status = 0;";
+                  $result = mysqli_query($link, $request);
+                  while($res1=mysqli_fetch_assoc($result)){
+                      $requestCount++;
+                  }
+                  ?>
+                  <span class="badge badge-sm up bg-danger count"><?php echo $requestCount; ?></span>
+              </a >
+              <section class="dropdown-menu aside-xl animated fadeInUp">
+                  <section class="panel bg-white">
+                      <div class="panel-heading b-light bg-light">
 
+                          <strong>You have <span class="count" style="display: inline;"><?php echo $requestCount; ?></span> friend requests</strong>
+                      </div>
+                      <div class="list-group list-group-alt">
+                          <?php
+                          // get number of friend request
+                          $result = mysqli_query($link, $request);
+                          if($result){
+                              while($res2=mysqli_fetch_assoc($result)){
+
+                                  echo '<div class="media list-group-item" style="display: block;">';
+                                  echo '<span class="pull-left thumb-sm text-center col-sm-3">
+                              <i class=" icon-user-follow i-lg"></i>
+                          </span>';
+                                  echo '<span class="media-body block m-b-none col-sm-7">'.$res2['uname'].' wants to be your friend &nbsp</span>
+                            <div class="col-sm-1"><form action = "acceptFriendRequest.php" method = "POST"><button type="submit" name="accept" value="'.$res2['uid1'].'" ><i class="icon-check"></i></button></form></div>
+                            <div class="col-sm-1"><form action = "declineFriendRequest.php" method = "POST"><button type="submit" name="decline" value="'.$res2['uid1'].'" ><i class="icon-close"></i></button></form></div>';
+                                  echo '</div>';
+                              }
+                          }
+                          ?>
+                      </div>
+
+                  </section>
               </section>
-            </section>
           </li>
           <li class="dropdown">
             <a href="#" class="dropdown-toggle bg clear" data-toggle="dropdown">
@@ -114,7 +145,7 @@ include ('connectToDB.php');
 
               <li class="divider"></li>
               <li>
-                <a href="signin.php" data-toggle="ajaxModal" >Logout</a>
+                <a href="signin.php"  >Logout</a>
               </li>
             </ul>
           </li>
@@ -162,13 +193,24 @@ Discover
                         <span class="font-bold">Post Activity</span>
                       </a>
                     </li>
+                      <li>
+                          <a href="footprint.php">
+                              <i class="icon-pin icon text-primary-lter"></i>
+                              <span class="font-bold">Foot Print</span>
+                          </a>
+                      </li>
+                      <li>
+                          <a href="addFriend.php">
+                              <i class="icon-user icon text-primary-lter"></i>
+                              <span class="font-bold">New Friend</span>
+                          </a>
+                      </li>
+
 
 
                     <li class="m-b hidden-nav-xs"></li>
                   </ul>
 
-                    </li>
-                  </ul>
                 </nav>
                 <!-- / nav -->
               </div>
@@ -177,30 +219,36 @@ Discover
           </section>
         </aside>
         <!-- /.aside -->
-        <section id="content">
-          <section class="hbox stretch">
-            <section>
-              <section class="vbox"><section class="scrollable padder-lg w-f-md" id="bjax-target">
-                  <a href="#" class="pull-right text-muted m-t-lg" data-toggle="class:fa-spin" ><i class="icon-refresh i-lg  inline" id="refresh"></i></a>
-                  <h2 class="font-thin m-b">Discover <span class="musicbar animate inline m-l-sm" style="width:20px;height:20px">
+          <section id="content">
+              <section class="hbox stretch">
+                  <section>
+                      <section class="vbox"><section class="scrollable padder-lg w-f-md" id="bjax-target">
+                              <a href="#" class="pull-right text-muted m-t-lg" data-toggle="class:fa-spin" ><i class="icon-refresh i-lg  inline" id="refresh"></i></a>
+                              <h2 class="font-thin m-b">Discover <span class="musicbar animate inline m-l-sm" style="width:20px;height:20px">
                     <span class="bar1 a1 bg-primary lter"></span>
                     <span class="bar2 a2 bg-info lt"></span>
                     <span class="bar3 a3 bg-success"></span>
                     <span class="bar4 a4 bg-warning dk"></span>
                     <span class="bar5 a5 bg-danger dker"></span>
                   </span></h2>
-                  <div class="row row-sm">
-                  <section>
-                    <header height="300px" line-height="200px" text-align="center" background="#303e49">
-                       <h1 >Timeline</h1>
-                    </header>
-                    <br>
+                              <div class="row row-sm">
+                                  <section>
+                                      <header height="300px" line-height="200px" text-align="center" background="#303e49">
+                                          <h1 >Timeline</h1>
+                                      </header>
+                                      <br>
 <?php
-$display = "SELECT uname, pid, uid, ptime, lname, title, text, image, video, activity
-FROM Post NATURAL JOIN Location NATURAL JOIN Profile NATURAL JOIN User
+$display = "SELECT uname, pid, uid, lname, ptime, title, text, image, video, activity
+FROM Post NATURAL JOIN Profile NATURAL JOIN User
 WHERE uid IN (SELECT uid2 FROM Friendship WHERE uid1=$_SESSION[uid]) 
 AND ptime >= last_signin
 AND visibility > 0
+
+UNION
+
+SELECT uname, pid, uid, lname, ptime, title, text, image, video, activity
+FROM Post NATURAL JOIN Profile NATURAL JOIN User
+WHERE uid =$_SESSION[uid]
 ORDER BY ptime DESC;";
 
 //
@@ -230,7 +278,7 @@ while($res1=mysqli_fetch_assoc($result)){
 
 
 
-                  </div>
+
                   <div class="row">
 
 
@@ -263,22 +311,22 @@ while($res1=mysqli_fetch_assoc($result)){
                       if($_SERVER["REQUEST_METHOD"] == "POST") {
                           $searchMem = $_POST['searchMem'];
                           if ($searchMem) {
-                              $friendList = "SELECT uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid AND Uname LIKE '%$searchMem%'";
+                              $friendList = "SELECT uid1, uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid AND Uname LIKE '%$searchMem%'";
                           }else {
-                              $friendList = "SELECT uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid";
+                              $friendList = "SELECT uid1,uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid";
                           }
                       }else {
-                          $friendList = "SELECT uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid";
+                          $friendList = "SELECT uid1, uname, city FROM User, Friendship WHERE uid2=$_SESSION[uid] AND status=1 AND uid1=uid";
                       }
                           $result = mysqli_query($link, $friendList);
                           while ($res1 = mysqli_fetch_assoc($result)) {
                               echo "<li class=\"list-group-item\">
                       <span class=\"pull-left thumb-xs m-t-xs avatar m-l-xs m-r-sm\">
-                        <img src=\"images/a1.png\" alt=\"...\" class=\"img-circle\">
+                        <img src=\"images/2.pic.jpg\" alt=\"...\" class=\"img-circle\">
                         <i class=\"on b-light right sm\"></i>
                       </span>
                       <div class=\"clear\">
-                        <div><a href=\"#\">$res1[uname]</a></div>
+                        <div><a href=\"message.php?receiver=$res1[uid1]\">$res1[uname]</a></div>
                         <small class=\"text-muted\">$res1[city]</small>
                       </div>
                     </li>";
@@ -316,7 +364,7 @@ while($res1=mysqli_fetch_assoc($result)){
   <!-- App -->
   <script src="js/app.js"></script>
   <script src="js/slimscroll/jquery.slimscroll.min.js"></script>
-    <script src="js/app.plugin.js"></script>
+    <!--<script src="js/app.plugin.js"></script>-->
 
   <script type="text/javascript" src="js/jPlayer/jquery.jplayer.min.js"></script>
   <script type="text/javascript" src="js/jPlayer/add-on/jplayer.playlist.min.js"></script>

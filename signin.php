@@ -96,7 +96,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
   <footer id="footer">
     <div class="text-center padder">
       <p>
-        <small>Web app framework base on Bootstrap<br>&copy; 2014</small>
+        <small>NYU Tandon Computer Science<br>&copy; 2016</small>
       </p>
     </div>
   </footer>

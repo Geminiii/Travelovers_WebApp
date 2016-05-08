@@ -2,45 +2,16 @@
 /**
  * Created by PhpStorm.
  * User: Li
- * Date: 4/28/16
- * Time: 4:29 PM
+ * Date: 5/5/16
+ * Time: 11:42 PM
  */
-
 session_start();
+
 ini_set('display_errors', 'On');
 
-$link = mysqli_connect('localhost','root','root');
-if (!$link) {
-    die('Could not connect: ' . mysql_error());
-}
-mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");
+include ('connectToDB.php');?>
 
-$title = $diary = $picture = $video = $select='';
 
-    if($_SERVER["REQUEST_METHOD"] == "POST") {
-        if (empty($_POST["title"])) {
-            $nameErr = "Title is required";
-        }else{
-            $title=$_POST["title"];
-        }
-        $lname = $_POST['lname'];
-        $diary = $_POST["diary"];
-        $pictureFileName = $_FILES['picture']['tmp_name'];
-        $videoFileName = $_FILES['video']['tmp_name'];
-        if ($pictureFileName){$picture =addslashes(file_get_contents($pictureFileName));}
-        if ($videoFileName) {$video =addslashes(file_get_contents($pictureFileName));}
-
-        $select = $_POST['visibility'];
-
-        $post="INSERT INTO Post(pid, uid, ptime, lname, title, text, image, video, visibility, activity) VALUES (NULL,".$_SESSION["uid"].",NULL, '$lname', '$title', '$diary', '{$picture}', '{$video}', $select, 0)";
-        if(mysqli_query($link, $post)===TRUE){
-            header('Location:/home.php');
-        }else{
-            echo "Error:".$post."<br>";
-        }
-    }
-
-?>
 <!DOCTYPE html>
 <html lang="en" class="app">
 <head>
@@ -173,7 +144,7 @@ $title = $diary = $picture = $video = $select='';
 
                         <li class="divider"></li>
                         <li>
-                            <a href="signin.php">Logout</a>
+                            <a href="signin.php"  >Logout</a>
                         </li>
                     </ul>
                 </li>
@@ -228,11 +199,12 @@ $title = $diary = $picture = $video = $select='';
                                         </a>
                                     </li>
                                     <li>
-                                        <a href=" ">
+                                        <a href="addFriend.php">
                                             <i class="icon-user icon text-primary-lter"></i>
                                             <span class="font-bold">New Friend</span>
-                                        </a >
+                                        </a>
                                     </li>
+
 
 
                                     <li class="m-b hidden-nav-xs"></li>
@@ -261,174 +233,127 @@ $title = $diary = $picture = $video = $select='';
                                 <div class="row row-sm">
                                     <section>
                                         <header height="300px" line-height="200px" text-align="center" background="#303e49">
-                                            <h1 >Post Diary</h1>
-                                        </header><br>
+                                            <h1 >Message</h1>
+                                        </header>
+                                        <br>
+<?php
 
-<form method="POST" enctype="multipart/form-data">
-    <div class="form-group pull-in clearfix" >
-        <div class="col-sm-6">
-            <label>Title</label>
-            <input name="title" type="text" class="form-control" placeholder="Title">
-        </div>
-    </div>
-    <div class="form-group  pull-in clearfix">
-        <div class="col-sm-6">
-            <label>Diary</label>
-            <textarea name="diary" class="form-control" rows="5" placeholder="Type your diary"></textarea>
-        </div>
-    </div>
-    <div class="form-group  pull-in clearfix">
-        <div class="col-sm-6">
-        <label>Select picture to upload</label>
-        <input name="picture" type="file" class="form-control" placeholder="Picture"></div>
-    </div>
+$receiver=$_GET['receiver'];
+$sender=$_SESSION['uid'];
 
-    <div class="form-group  pull-in clearfix">
-        <div class="col-sm-6">
-        <label>Select video to upload</label>
-        <input name="video" type="file" class="form-control" placeholder="Video"></div>
-    </div>
-    <div>
-    <?php #include('location.php');?>
-        <div style='position:relative'>
-            <script type="text/javascript">
-                function loadmap() {
-                    // initialize map
-                    var map = new google.maps.Map(document.getElementById("map-canvas"), {
-                        center: new google.maps.LatLng(40.641, -74.020),
-                        zoom: 17,
-                        mapTypeId: google.maps.MapTypeId.ROADMAP
-                    });
-                    // initialize marker
-                    var marker = new google.maps.Marker({
-                        position: map.getCenter(),
-                        draggable: true,
-                        map: map
-                    });
+if($_SERVER["REQUEST_METHOD"] == "POST") {
+    $storeHistory = "INSERT INTO message(uid1,uid2,message,mtime) VALUE ('$sender', '$receiver', '$_POST[message]',NULL)";
+    mysqli_query($link, $storeHistory);
+}
 
-                    // intercept map and marker movements
-                    /*google.maps.event.addListener(map, "idle", function() {
-                     marker.setPosition(map.getCenter());
-                     //document.getElementById("map-output").innerHTML = "Latitude:  " + map.getCenter().lat().toFixed(6) + "<br>Longitude: " + map.getCenter().lng().toFixed(6) + "<br>Zoom:" + map.getZoom() ;
-                     document.myform.lati.value =  map.getCenter().lat().toFixed(4);
-                     document.myform.long.value =  map.getCenter().lng().toFixed(4);
-                     //console.log(map.getCenter().results[1]);
-                     });*/
+$history="SELECT * FROM message 
+WHERE (uid1='$receiver' AND uid2='$sender') OR (uid2='$receiver' AND uid1='$sender')
+ORDER BY mtime";
 
-                    google.maps.event.addListener(marker, "dragend", function(mapEvent) {
-                        map.panTo(mapEvent.latLng);
-                    });
+$result=mysqli_query($link, $history);
 
-                    // initialize geocoder
-                    var geocoder = new google.maps.Geocoder();
-                    google.maps.event.addDomListener(document.getElementById("search-btn"), "click", function() {
-                        geocoder.geocode({ address: document.getElementById("search-txt").value }, function(results, status) {
-                            if (status == google.maps.GeocoderStatus.OK) {
-                                var result = results[0];
-                                document.getElementById("search-txt").value = result.formatted_address;
-                                document.myform.lname.value = result.formatted_address;
-                                if (result.geometry.viewport) {
-                                    map.fitBounds(result.geometry.viewport);
-                                } else {
-                                    map.setCenter(result.geometry.location);
-                                }
-                            } else if (status == google.maps.GeocoderStatus.ZERO_RESULTS) {
-                                alert("Sorry, geocoder API failed to locate the address.");
-                            } else {
-                                alert("Sorry, geocoder API failed with an error.");
-                            }
-                        });
-                    });
-                    google.maps.event.addDomListener(document.getElementById("search-txt"), "keydown", function(domEvent) {
-                        if (domEvent.which === 13 || domEvent.keyCode === 13) {
-                            google.maps.event.trigger(document.getElementById("search-btn"), "click");
-                        }
-                    });
 
-                    // initialize geolocation
-                    if (navigator.geolocation) {
-                        google.maps.event.addDomListener(document.getElementById("detect-btn"), "click", function() {
-                            navigator.geolocation.getCurrentPosition(function(position) {
-                                map.setCenter(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
-                            }, function() {
-                                alert("Sorry, geolocation API failed to detect your location.");
-                            });
-                        });
-                        document.getElementById("detect-btn").disabled = false;
-                    }
-                }
+?>
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <!-- chat -->
+                                                <section class="panel panel-default">
+                                                    <header class="panel-heading">Chat</header>
+                                                    <section class="chat-list panel-body">
+                                                        <?php
+                                                            while($res5=mysqli_fetch_assoc($result)){
+                                                                if($res5['uid2']==$sender){
+                                                                    echo "<article id=\"chat-id-1\" class=\"chat-item left\">
+                                                            <a href=\"#\" class=\"pull-left thumb-sm avatar\"><img src=\"images/a2.png\" alt=\"...\"></a>
+                                                            <section class=\"chat-body\">
+                                                                <div class=\"panel b-light text-sm m-b-none\">
+                                                                    <div class=\"panel-body\">
+                                                                        <span class=\"arrow left\"></span>
+                                                                     <p class=\"m-b-none\">$res5[message]</p>
+                                                                    </div>
+                                                                </div>
+                                                                <small class=\"text-muted\"><i class=\"fa fa-ok text-success\"></i> $res5[mtime]</small>
+                                                            </section>
+                                                        </article>";
 
-            </script>
-            <?php #include('location.php');?>
-            <div id="map-search">
-                <input name="lname" id="search-txt"  type="text" value="348, 61st, Brooklyn, NY 11220 USA" maxlength="100">
-                <input id="search-btn" type="button" value="Locate Address">
-                <input id="detect-btn" type="button" value="Detect Location" disabled>
-            </div><br>
-            <div id="input-info">
-                <!--form action = "location.php" method="post" name="myform"-->
-                <input id="search-txt" type="hidden" placeholder="Name this new location" name="loname" maxlength="100">
-                <input id="submit-btn" type="hidden" value="PIN this Location">
-                <!--input type="hidden" name="lati"-->
-                <input type="hidden" name="long" >
-                <!--input type="hidden" name="lname"-->
-                <!--/form-->
-            </div>
-            <div id="map-canvas" style="height:300px;width:350px"></div>
-            <div id="map-output"></div>
-            <br>
+                                                                }
+                                                                if($res5['uid1']==$sender){
+                                                                    echo "<article id=\"chat-id-2\" class=\"chat-item right\">
+                                                            <a href=\"#\" class=\"pull-right thumb-sm avatar\"><img src=\"images/a3.png\" class=\"img-circle\" alt=\"...\"></a>
+                                                            <section class=\"chat-body\">
+                                                                <div class=\"panel bg-light text-sm m-b-none\">
+                                                                    <div class=\"panel-body\">
+                                                                        <span class=\"arrow right\"></span>
+                                                                        <p class=\"m-b-none\">$res5[message]</p>
+                                                                    </div>
+                                                                </div>
+                                                                <small class=\"text-muted\">$res5[mtime]</small>
+                                                            </section>
+                                                        </article>";
+                                                                }
+                                                            }
 
-            </script>
-            <script src="https://maps.googleapis.com/maps/api/js? v=3&amp;sensor=false&amp;key=AIzaSyAv0lkA20J7N5lSHwS4mjklob4wUBajWL8&amp;callback=loadmap" defer ></script>
-        </div>
-    </div>
-    <div class="form-group">
-        <label>Choose who can see</label><br>
-            <input type="radio" name = "visibility" value="3" checked> Public<br>
-            <input type="radio" name = "visibility" value="2"> Show to FOF<br>
-            <input type="radio" name = "visibility" value="1"> Show to friends<br>
-            <input type="radio" name = "visibility" value="0"> Only I can see<br>
-    </div>
-    <div class="form-group">
-        <button type="submit" class="btn btn-success">Submit</button>
-    </div>
-</form>
-
-</section>
+                                                        ?>
 
 
 
-</div>
-<div class="row">
+                                                    </section>
+                                                    <footer class="panel-footer">
+                                                        <!-- chat form -->
+                                                        <article class="chat-item" id="chat-form">
+                                                            <a class="pull-left thumb-sm avatar"><img src="images/a3.png" class="img-circle" alt="..."></a>
+                                                            <section class="chat-body">
+                                                                <form action="message.php?receiver=<?php echo $receiver;?>" method="post" class="m-b-none">
+                                                                    <div class="input-group">
+                                                                        <input name="message" type="text" class="form-control" placeholder="Say something">
+                                                                        <span class="input-group-btn">
+                                                                            <button class="btn btn-default" type="submit">SEND</button>
+                                                                        </span>
+                                                                    </div>
+                                                                </form>
+                                                            </section>
+                                                        </article>
+                                                    </footer>
+                                                </section>
+                                                <!-- /chat -->
 
 
-</div>
-<div class="row m-t-lg m-b-lg">
-    <div class="col-sm-6">
-        <div class="bg-primary wrapper-md r">
 
-        </div>
-    </div>
-    <div class="col-sm-6">
-        <div class="bg-black wrapper-md r">
+                                    </section>
 
-        </div>
-    </div>
-</div>
-</section>
 
-<!A footer is deleted here>
 
-</section>
-</section>
-<!-- side content -->
 
-<!-- / side content -->
-</section>
-<a href="#" class="hide nav-off-screen-block" data-toggle="class:nav-off-screen,open" data-target="#nav,html"></a>
-</section>
-</section>
-</section>
+                                    <div class="row">
+
+
+                                    </div>
+                                    <div class="row m-t-lg m-b-lg">
+                                        <div class="col-sm-6">
+                                            <div class="bg-primary wrapper-md r">
+
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="bg-black wrapper-md r">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                            </section>
+
+                            <!A footer is deleted here>
+
+                        </section>
+                    </section>
+                    <!-- side content -->
+
+                    <!-- / side content -->
+                </section>
+                <a href="#" class="hide nav-off-screen-block" data-toggle="class:nav-off-screen,open" data-target="#nav,html"></a>
+            </section>
+        </section>
+    </section>
 </section>
 <script src="js/jquery.min.js"></script>
 <!-- Bootstrap -->

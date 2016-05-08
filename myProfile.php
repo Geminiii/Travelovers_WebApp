@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "connection.php";
+include 'connection.php';
 $tel = $biography = $photo = $visibility = $last_signin='';
 $uname = $city = $birthdate = $signup_time = $signup_email ='';
 $uid = $_SESSION['uid'];
@@ -64,8 +64,8 @@ if(!isset($_SESSION['uid'])){
             <a class="btn btn-link visible-xs" data-toggle="class:nav-off-screen,open" data-target="#nav,html">
                 <i class="icon-list"></i>
             </a>
-            <a href="index.html" class="navbar-brand text-lt">
-                <i class="icon-earphones"></i>
+            <a href="home.php" class="navbar-brand text-lt">
+                <i class="fa fa-globe"></i>
                 <img src="images/logo.png" alt="." class="hide">
                 <span class="hidden-nav-xs m-l-sm">Travelovers</span>
             </a>
@@ -98,12 +98,43 @@ if(!isset($_SESSION['uid'])){
         <div class="navbar-right ">
             <ul class="nav navbar-nav m-n hidden-xs nav-user user">
                 <li class="hidden-xs">
-                    <a href="#" class="dropdown-toggle lt" data-toggle="dropdown">
+                    <a href=" " class="dropdown-toggle lt" data-toggle="dropdown">
                         <i class="icon-bell"></i>
-                        <span class="badge badge-sm up bg-danger count">2</span>
-                    </a>
+                        <?php
+                        $requestCount = 0;
+                        $request = "SELECT uid1,uname from Friendship, User where Friendship.uid1 = user.uid and uid2 = $_SESSION[uid] and status = 0;";
+                        $result = mysqli_query($conn, $request);
+                        while($res1=mysqli_fetch_assoc($result)){
+                            $requestCount++;
+                        }
+                        ?>
+                        <span class="badge badge-sm up bg-danger count"><?php echo $requestCount; ?></span>
+                    </a >
                     <section class="dropdown-menu aside-xl animated fadeInUp">
                         <section class="panel bg-white">
+                            <div class="panel-heading b-light bg-light">
+
+                                <strong>You have <span class="count" style="display: inline;"><?php echo $requestCount; ?></span> friend requests</strong>
+                            </div>
+                            <div class="list-group list-group-alt">
+                                <?php
+                                // get number of friend request
+                                $result = mysqli_query($link, $request);
+                                if($result){
+                                    while($res2=mysqli_fetch_assoc($result)){
+
+                                        echo '<div class="media list-group-item" style="display: block;">';
+                                        echo '<span class="pull-left thumb-sm text-center col-sm-3">
+                              <i class=" icon-user-follow i-lg"></i>
+                          </span>';
+                                        echo '<span class="media-body block m-b-none col-sm-7">'.$res2['uname'].' wants to be your friend &nbsp</span>
+                            <div class="col-sm-1"><form action = "acceptFriendRequest.php" method = "POST"><button type="submit" name="accept" value="'.$res2['uid1'].'" ><i class="icon-check"></i></button></form></div>
+                            <div class="col-sm-1"><form action = "declineFriendRequest.php" method = "POST"><button type="submit" name="decline" value="'.$res2['uid1'].'" ><i class="icon-close"></i></button></form></div>';
+                                        echo '</div>';
+                                    }
+                                }
+                                ?>
+                            </div>
 
                         </section>
                     </section>
@@ -131,7 +162,7 @@ if(!isset($_SESSION['uid'])){
 
                         <li class="divider"></li>
                         <li>
-                            <a href="modal.lockme.html" data-toggle="ajaxModal" >Logout</a>
+                            <a href="signin.php" >Logout</a>
                         </li>
                     </ul>
                 </li>
@@ -178,6 +209,19 @@ if(!isset($_SESSION['uid'])){
                                             <i class="icon-drawer icon text-primary-lter"></i>
                                             <span class="font-bold">Post Activity</span>
                                         </a>
+                                    </li>
+
+                                    <li>
+                                        <a href="footprint.php">
+                                            <i class="icon-pin icon text-primary-lter"></i>
+                                            <span class="font-bold">Foot Print</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href=" ">
+                                            <i class="icon-user icon text-primary-lter"></i>
+                                            <span class="font-bold">New Friend</span>
+                                        </a >
                                     </li>
 
 

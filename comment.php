@@ -11,11 +11,7 @@ session_start();
 ini_set('display_errors', 'On');
 
 include ('connectToDB.php');
-/*$link = mysqli_connect('localhost','root','root');
-if (!$link) {
-    die('Could not connect: ' . mysql_error());
-}
-mysqli_select_db($link,'DB_Project1') or die( "Unable to select database");*/
+
 $text = $_POST['text'];
 $uid=$_SESSION['uid'];
 $pid=$_SESSION['pid'];
